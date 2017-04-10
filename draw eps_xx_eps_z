@@ -1,0 +1,61 @@
+clear all
+
+csp = 3e8;
+q0 = 1.602e-19;
+hb = 1.055e-34;  
+
+fontsizeTitle=15;
+fontsizeLabel=26;
+epsMAX=150;
+number_of_eps_points=10000;
+output_1=zeros(number_of_eps_points, 2);
+output_2=zeros(number_of_eps_points, 2);
+
+% boron nitride dielectric
+
+om1_xy = 1610; %cm-1
+om2_xy = 1370; %cm-1
+om1_z = 830; %cm-1
+om2_z = 780; %cm-1
+
+% taken from Y. Cai, L. Zhang et al, "Infrared Reflectance spectrum of
+% BN calculated from first principle"
+epsinf_xy = 4.9; % note 'xy' here does not refer to the tensor component
+epsinf_z = 3;
+
+Emin = 0.07;
+Emax = 0.25;
+
+gamma_xy = 5;
+gamma_z = 4;
+
+Earray = linspace(Emin, Emax, number_of_eps_points);
+
+for Enode=1:number_of_eps_points
+    Omarraywn = Earray(Enode)*q0/(hb*2*pi*csp*100);
+    Omarray = Earray(Enode)*q0/hb;
+    eps_xy = epsinf_xy + epsinf_xy*(om1_xy^2-om2_xy^2)./(om2_xy^2-Omarraywn.^2-i*Omarraywn*gamma_xy);
+    eps_z = epsinf_z + epsinf_z*(om1_z^2-om2_z^2)./(om2_z^2-Omarraywn.^2-i*Omarraywn*gamma_z);
+    output_1(Enode,1)=Earray(Enode);
+    output_1(Enode,2)=imag(eps_xy);
+    output_2(Enode,1)=Earray(Enode);
+    output_2(Enode,2)=imag(eps_z);
+end
+
+
+
+
+
+
+plot(output_1(:,2),real(output_1(:,2)),'-r','MarkerSize',8, 'LineWidth',4);
+plot(output_2(:,2),real(output_2(:,2)),'-b','MarkerSize',8, 'LineWidth',4);
+save('C:\Users\Admin\Desktop\data for paper\eps_xy_1.txt','output_1','-ASCII','-double');
+save('C:\Users\Admin\Desktop\data for paper\eps_z_1.txt','output_2','-ASCII','-double');
+
+ylim([-150 150]);
+xlim([600 1700]);
+set(gca, 'FontSize', fontsizeLabel, 'FontName','Times', 'FontWeight', 'Normal' )
+xlabel('Frequency $$ \omega$$ (cm$$^{-1}$$)', 'FontSize', fontsizeLabel, 'FontWeight', 'Bold', 'FontName','Times','Interpreter', 'LaTex' )
+ylabel('$$\Re\{\epsilon\}$$', 'FontSize', fontsizeLabel, 'FontWeight', 'Bold', 'FontName','Times','Interpreter', 'LaTex' )
+hleg = legend('$$\Re\{\epsilon_{xx}\}$$','$$\Re\{\epsilon_{zz}\}$$','location','NorthWest');
+set(hleg, 'FontName','Times','Interpreter', 'LaTex', 'FontSize', fontsizeLabel )
